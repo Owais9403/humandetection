@@ -9,12 +9,14 @@ classes = []
 # Load coco
 with open("lib/coco.names", "r") as f:
     classes = [line.strip() for line in f.readlines()]
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
+# Specify output layer names directly for YOLOv3-tiny
+output_layers = ['yolo_16', 'yolo_23']  # These are the output layers for YOLOv3-tiny
+
 colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
 # Loading video
-cap = cv2.VideoCapture("vidoes/kid_street_biking.mp4")
+cap = cv2.VideoCapture(0)
 
 font = cv2.FONT_HERSHEY_PLAIN
 starting_time = time.time()
@@ -43,12 +45,12 @@ while True:
                 # Object detected
                 center_x = int(detection[0] * width)
                 center_y = int(detection[1] * height)
-                w = int(detection[3] * width)
+                w = int(detection[2] * width)
                 h = int(detection[3] * height)
 
                 # Rectangle coordinates
-                x = int(center_x - w / 1.8)
-                y = int(center_y - h / 1.8)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
 
                 boxes.append([x, y, w, h])
                 confidences.append(float(confidence))
@@ -64,8 +66,6 @@ while True:
             color = colors[class_ids[i]]
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
             cv2.putText(frame, label + " " + str(round(confidence, 2)), (x, y + 30), font, 2, color, 2)
-
-
 
     elapsed_time = time.time() - starting_time
     fps = frame_id / elapsed_time
